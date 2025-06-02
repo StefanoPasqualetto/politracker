@@ -1,11 +1,21 @@
 # backend/app/api.py
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.scraper import get_profile_data
 from app.analyzer import analyze_text
 
 app = FastAPI()
+
+# 👇 PATCH CORS PER SVILUPPO LOCALE
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # oppure ["*"] per sviluppo libero
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class AnalyzeRequest(BaseModel):
     target: str
