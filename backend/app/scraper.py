@@ -5,27 +5,35 @@ from bs4 import BeautifulSoup
 
 def get_profile_data(target):
     base_url = "https://it.wikipedia.org/wiki/"
-    # wikipedia usa il formato mario_rossi
-    url = base_url + target.replace(" ", "_")
+    formatted = target.strip().replace(" ", "_")
+    url = base_url + formatted
+
+    print(f"🌐 URL Wikipedia: {url}")
 
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
     except requests.RequestException as e:
-        return {"error": f"Errore nella richiesta: {str(e)}"}
+        print(f"❌ Errore nella richiesta HTTP: {e}")
+        return {}
 
     soup = BeautifulSoup(response.content, "html.parser")
-
-    # Prendo il primo paragrafo utile
     paragraphs = soup.select("p")
+
+    print(f"📄 Trovati {len(paragraphs)} paragrafi...")
+
     bio = ""
     for p in paragraphs:
         text = p.get_text().strip()
-        if len(text) > 50:  # salto paragrafi vuoti o brevi
+        print(f"— {text[:60]}...")  # stampa solo i primi 60 caratteri per debug
+        if len(text) > 50:
             bio = text
             break
 
-    # Provo a recuperare anche l'immagine se presente
+    if not bio:
+        print("⚠️ Nessun paragrafo significativo trovato.")
+        return {}
+
     img_tag = soup.select_one(".infobox img")
     image_url = f"https:{img_tag['src']}" if img_tag else None
 
